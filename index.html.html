@@ -1,0 +1,503 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hiragana Flashcards (46)</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      background: #121212;
+      color: #fff;
+    }
+    .card-container {
+      perspective: 1000px;
+      margin-bottom: 1rem;
+    }
+    .flashcard {
+      width: 280px;
+      height: 360px;
+      text-align: center;
+      border-radius: 15px;
+      background: linear-gradient(to top left, #fceabb, #f8b500);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      transform-style: preserve-3d;
+      transition: transform 0.8s;
+      position: relative;
+      cursor: pointer;
+    }
+    .flashcard.is-flipped {
+      transform: rotateY(180deg);
+    }
+    .front, .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+    .back {
+      background: linear-gradient(to bottom right, #a1c4fd, #c2e9fb);
+      transform: rotateY(180deg);
+    }
+    .kana {
+      font-size: 4rem;
+      font-weight: bold;
+      color: #d32f2f;
+      margin-bottom: 1rem;
+    }
+    .emoji {
+      font-size: 5rem;
+      margin-bottom: 1rem;
+    }
+    .romaji {
+      font-size: 2rem;
+      margin: 0.5rem 0;
+    }
+    .meaning {
+      font-size: 1.2rem;
+    }
+    .buttons, .nav {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #1976d2;
+      color: white;
+    }
+    .dark-toggle {
+      background: #444;
+      margin-top: 2rem;
+    }
+    .footer {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <h2>Delighted Champs</h2>
+
+  <div class="card-container" onclick="flipCard()">
+    <div class="flashcard" id="flashcard">
+      <div class="front">
+        <div class="kana" id="kanaFront"></div>
+        <div class="emoji" id="emojiFront"></div>
+      </div>
+      <div class="back">
+        <div class="emoji" id="emojiBack"></div>
+        <div class="romaji" id="romaji"></div>
+        <div class="meaning" id="meaning"></div>
+        <div class="buttons">
+          <button onclick="playAudio(event)">🔊 Pronounce</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button onclick="prevCard()">⏮️ Previous</button>
+    <button onclick="nextCard()">⏭️ Next</button>
+  </div>
+
+  <button class="dark-toggle" onclick="toggleDarkMode()">🌓 Toggle Dark Mode</button>
+  <div class="footer">Powered by <a href="https://delightedchamps.com" target="_blank">Delighted Champs</a></div>
+
+  <script>
+    const cards = [{
+        kana: "あ",
+        word: "あめ",
+        romaji: "ame",
+        meaning: "rain",
+        emoji: "🍬"
+    },
+{
+        kana: "い",
+        word: "いぬ",
+        romaji: "inu",
+        meaning: "dog",
+        emoji: "🐶"
+    },
+{
+        kana: "う",
+        word: "うみ",
+        romaji: "umi",
+        meaning: "sea",
+        emoji: "🌊"
+    },
+{
+        kana: "え",
+        word: "えき",
+        romaji: "eki",
+        meaning: "station",
+        emoji: "🚉"
+    },
+{
+        kana: "お",
+        word: "おちゃ",
+        romaji: "ocha",
+        meaning: "tea",
+        emoji: "🍵"
+    },
+{
+        kana: "か",
+        word: "かさ",
+        romaji: "kasa",
+        meaning: "umbrella",
+        emoji: "☂️"
+    },
+{
+        kana: "き",
+        word: "き",
+        romaji: "ki",
+        meaning: "tree",
+        emoji: "🌳"
+    },
+{
+        kana: "く",
+        word: "くるま",
+        romaji: "kuruma",
+        meaning: "car",
+        emoji: "🚗"
+    },
+{
+        kana: "け",
+        word: "けしき",
+        romaji: "keshiki",
+        meaning: "scenery",
+        emoji: "🌄"
+    },
+{
+        kana: "こ",
+        word: "こども",
+        romaji: "kodomo",
+        meaning: "child",
+        emoji: "🧒"
+    },
+{
+        kana: "さ",
+        word: "さくら",
+        romaji: "sakura",
+        meaning: "cherry blossom",
+        emoji: "🌸"
+    },
+{
+        kana: "し",
+        word: "しか",
+        romaji: "shika",
+        meaning: "deer",
+        emoji: "🦌"
+    },
+{
+        kana: "す",
+        word: "すいか",
+        romaji: "suika",
+        meaning: "watermelon",
+        emoji: "🍉"
+    },
+{
+        kana: "せ",
+        word: "せかい",
+        romaji: "sekai",
+        meaning: "world",
+        emoji: "🌍"
+    },
+{
+        kana: "そ",
+        word: "そら",
+        romaji: "sora",
+        meaning: "sky",
+        emoji: "☁️"
+    },
+{
+        kana: "た",
+        word: "たまご",
+        romaji: "tamago",
+        meaning: "egg",
+        emoji: "🥚"
+    },
+{
+        kana: "ち",
+        word: "ちず",
+        romaji: "chizu",
+        meaning: "map",
+        emoji: "🗺️"
+    },
+{
+        kana: "つ",
+        word: "つき",
+        romaji: "tsuki",
+        meaning: "moon",
+        emoji: "🌕"
+    },
+{
+        kana: "て",
+        word: "て",
+        romaji: "te",
+        meaning: "hand",
+        emoji: "🤚"
+    },
+{
+        kana: "と",
+        word: "とり",
+        romaji: "tori",
+        meaning: "bird",
+        emoji: "🐦"
+    },
+{
+        kana: "な",
+        word: "なつ",
+        romaji: "natsu",
+        meaning: "summer",
+        emoji: "🏖️"
+    },
+{
+        kana: "に",
+        word: "にほん",
+        romaji: "nihon",
+        meaning: "Japan",
+        emoji: "🗾"
+    },
+{
+        kana: "ぬ",
+        word: "ぬいぐるみ",
+        romaji: "nuigurumi",
+        meaning: "stuffed toy",
+        emoji: "🧸"
+    },
+{
+        kana: "ね",
+        word: "ねこ",
+        romaji: "neko",
+        meaning: "cat",
+        emoji: "🐱"
+    },
+{
+        kana: "の",
+        word: "のみもの",
+        romaji: "nomimono",
+        meaning: "drink",
+        emoji: "🥤"
+    },
+{
+        kana: "は",
+        word: "はな",
+        romaji: "hana",
+        meaning: "flower",
+        emoji: "🌺"
+    },
+{
+        kana: "ひ",
+        word: "ひこうき",
+        romaji: "hikouki",
+        meaning: "airplane",
+        emoji: "✈️"
+    },
+{
+        kana: "ふ",
+        word: "ふゆ",
+        romaji: "fuyu",
+        meaning: "winter",
+        emoji: "❄️"
+    },
+{
+        kana: "へ",
+        word: "へや",
+        romaji: "heya",
+        meaning: "room",
+        emoji: "🛏️"
+    },
+{
+        kana: "ほ",
+        word: "ほん",
+        romaji: "hon",
+        meaning: "book",
+        emoji: "📖"
+    },
+{
+        kana: "ま",
+        word: "まど",
+        romaji: "mado",
+        meaning: "window",
+        emoji: "🪟"
+    },
+{
+        kana: "み",
+        word: "みかん",
+        romaji: "mikan",
+        meaning: "orange",
+        emoji: "🍊"
+    },
+{
+        kana: "む",
+        word: "むし",
+        romaji: "mushi",
+        meaning: "insect",
+        emoji: "🐞"
+    },
+{
+        kana: "め",
+        word: "め",
+        romaji: "me",
+        meaning: "eye",
+        emoji: "👁️"
+    },
+{
+        kana: "も",
+        word: "もり",
+        romaji: "mori",
+        meaning: "forest",
+        emoji: "🌲"
+    },
+{
+        kana: "や",
+        word: "やま",
+        romaji: "yama",
+        meaning: "mountain",
+        emoji: "⛰️"
+    },
+{
+        kana: "ゆ",
+        word: "ゆき",
+        romaji: "yuki",
+        meaning: "snow",
+        emoji: "☃️"
+    },
+{
+        kana: "よ",
+        word: "よる",
+        romaji: "yoru",
+        meaning: "night",
+        emoji: "🌃"
+    },
+{
+        kana: "ら",
+        word: "らいおん",
+        romaji: "raion",
+        meaning: "lion",
+        emoji: "🦁"
+    },
+{
+        kana: "り",
+        word: "りんご",
+        romaji: "ringo",
+        meaning: "apple",
+        emoji: "🍎"
+    },
+{
+        kana: "る",
+        word: "るすばん",
+        romaji: "rusuban",
+        meaning: "house-sitting",
+        emoji: "🏠"
+    },
+{
+        kana: "れ",
+        word: "れもん",
+        romaji: "remon",
+        meaning: "lemon",
+        emoji: "🍋"
+    },
+{
+        kana: "ろ",
+        word: "ろうそく",
+        romaji: "rousoku",
+        meaning: "candle",
+        emoji: "🕯️"
+    },
+{
+        kana: "わ",
+        word: "わに",
+        romaji: "wani",
+        meaning: "crocodile",
+        emoji: "🐊"
+    },
+{
+        kana: "を",
+        word: "をさら",
+        romaji: "osara",
+        meaning: "plate",
+        emoji: "🍽️"
+    },
+{
+        kana: "ん",
+        word: "ぱん",
+        romaji: "pan",
+        meaning: "bread",
+        emoji: "🍞"
+    }];
+    let currentIndex = 0;
+    let flipped = false;
+
+    const kanaEl = document.getElementById("kanaFront");
+    const emojiFrontEl = document.getElementById("emojiFront");
+    const emojiBackEl = document.getElementById("emojiBack");
+    const romajiEl = document.getElementById("romaji");
+    const meaningEl = document.getElementById("meaning");
+    const cardEl = document.getElementById("flashcard");
+
+    function updateCard() {
+      const card = cards[currentIndex];
+      kanaEl.textContent = card.word;
+      emojiFrontEl.textContent = card.emoji;
+      emojiBackEl.textContent = card.emoji;
+      romajiEl.textContent = card.romaji;
+      meaningEl.textContent = card.meaning;
+      cardEl.classList.remove("is-flipped");
+      flipped = false;
+    }
+
+    function flipCard() {
+      flipped = !flipped;
+      cardEl.classList.toggle("is-flipped");
+    }
+
+    function nextCard() {
+      currentIndex = (currentIndex + 1) % cards.length;
+      updateCard();
+    }
+
+    function prevCard() {
+      currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+      updateCard();
+    }
+
+    function playAudio(e) {
+      e.stopPropagation();
+      const utterance = new SpeechSynthesisUtterance(cards[currentIndex].word);
+      utterance.lang = "ja-JP";
+      speechSynthesis.speak(utterance);
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    updateCard();
+  </script>
+</body>
+</html>
